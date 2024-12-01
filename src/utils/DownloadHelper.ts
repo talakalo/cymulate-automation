@@ -27,7 +27,7 @@ export class DownloadHelper {
       console.log(`Validating file content for file: ${filePath}...`);
       const content = fs.readFileSync(filePath, 'utf-8');
       if (!content.includes(expectedContent)) {
-        throw new Error(`Expected content not found in file: ${filePath}`);
+        throw console.error(`Expected content not found in file: ${filePath}`);
       }
       console.log('File content validation successful.');
     } catch (error) {
