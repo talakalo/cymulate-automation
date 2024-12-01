@@ -1,3 +1,4 @@
+instarction :
 git clone git@github.com:talakalo/cymulate-automation.git
 
 cd cymulate-automation
