@@ -44,7 +44,8 @@ export default defineConfig({
     viewport: { width: 1920, height: 937 },
   },
   reporter: [
-    ['list'], // Replace 'list' with other built-in reporters if needed
+    ['list'], // Default console reporter
+    ['html', { outputFolder: 'playwright-report', open: 'never' }], // Enable HTML report
   ],
   /* Configure projects for major browsers */
   projects: [

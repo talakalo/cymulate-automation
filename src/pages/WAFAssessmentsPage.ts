@@ -15,7 +15,7 @@ export class WAFAssessmentsPage {
   async selectFirstCompletedRow() {
     try {
       console.log('Selecting the first Completed row...');
-      const firstRow = await this.page.locator(this.firstRow).first();
+      const firstRow = this.page.locator(this.firstRow).first();
       await firstRow.click();
       console.log('Selected the first Completed row successfully.');
 

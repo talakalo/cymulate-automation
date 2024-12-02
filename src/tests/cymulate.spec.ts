@@ -27,15 +27,15 @@ test.describe('Cymulate QA Automation', () => {
   const expectedStatus = 'Completed';
   const expectedScore = '29';
   const expectedFileContent = 'https://ekslabs.cymulatedev.com\\Program Files\\Apache Group\\Apache\\logs\\error.log';
-
+  let downloadHelper: DownloadHelper;
   test.beforeEach(async ({ page }) => {
     console.log('Setting up environment...');
-    const downloadHelper = new DownloadHelper(downloadDir);
+    downloadHelper = new DownloadHelper(downloadDir);
     downloadHelper.clearDownloadDir();
-    await page.context().newCDPSession(page).then((client) =>
+    await page.context().newCDPSession(page).then(client =>
       client.send('Page.setDownloadBehavior', {
         behavior: 'allow',
-        downloadPath: downloadDir,
+        downloadPath: downloadDir, // Set the desired download directory
       })
     );
     console.log('Environment setup completed.');
@@ -43,8 +43,7 @@ test.describe('Cymulate QA Automation', () => {
 
   test('Validate report details and download CSV', async ({ page }) => {
     const loginPage = new LoginPage(page);
-    const downloadHelper = new DownloadHelper(downloadDir);
-
+    downloadHelper= new DownloadHelper(downloadDir);
     try {
       console.log('Starting test: Validate report details and download CSV...');
 
@@ -69,76 +68,25 @@ test.describe('Cymulate QA Automation', () => {
         await wafReportForms.validateOverallScore(expectedScore);
       });
 
-      // await test.step('Download and validate the CSV report', async ({ page }) => {
-      //   downloadManagerPopup = new DownloadManager(page);
-      //   await downloadManagerPopup.clickDownloadButton();
-
-      //   // Wait for file to appear in the downloads directory
-      //   const files = fs.readdirSync(downloadDir);
-      //   console.log('Files in download directory:', files);
-
-      //   const csvFile = files.find(file => file.endsWith('.csv'));
-      //   if (!csvFile) {
-      //     throw new Error('CSV file not found in downloads directory.');
-      //   }
-
-      //   const filePath = path.join(downloadDir, csvFile);
-      //   console.log(`Validating file content for file: ${filePath}...`);
-
-      //   const fileContent = fs.readFileSync(filePath, 'utf-8');
-      //   if (!fileContent.includes(expectedFileContent)) {
-      //     throw new Error(`Expected content "${expectedFileContent}" not found in file: ${filePath}`);
-      //   }
-
-      //   console.log('File content validated successfully.');
-      // });
-
-      // await test.step('Download and validate the CSV report', async () => {
-      //   downloadManagerPopup = new DownloadManager(page);
-      //   await downloadManagerPopup.openDownloadManagerPopup();
-      //   await downloadManagerPopup.clickDownloadButton();
-        
-
-      //   //     const [download] = await Promise.all([
-      //   //       page.waitForEvent('download'),
-      //   //       downloadManagerPopup.clickDownloadButton(),
-      //   //     ]);
-
-      //   // Wait for file to appear in the downloads directory
-      //   const files = fs.readdirSync(downloadDir);
-      //   console.log('Files in download directory:', files);
-
-      //   const csvFile = files.find(file => file.endsWith('.csv'));
-      //   if (!csvFile) {
-      //     throw new Error('CSV file not found in downloads directory.');
-      //   }
-
-      //   const filePath = path.join(downloadDir, csvFile);
-      //   console.log(`Validating file content for file: ${filePath}...`);
-
-      //   const fileContent = fs.readFileSync(filePath, 'utf-8');
-      //   if (!fileContent.includes(expectedFileContent)) {
-      //     throw new Error(`Expected content "${expectedFileContent}" not found in file: ${filePath}`);
-      //   }
-
-      // });
+      await test.step('Generate and CSV report', async () => {
+        await wafReportForms.downloadCSV();
+        wafReportForms.validateReportDownloadToast()
+      });
 
       await test.step('Download and validate the CSV report', async () => {
+        
         downloadManagerPopup = new DownloadManager(page);
 
-      
-          await downloadManagerPopup.openDownloadManagerPopup();
+        await downloadManagerPopup.openDownloadManagerPopup();
 
-          const [download] = await Promise.all([
-            page.waitForEvent('download'),
-            downloadManagerPopup.clickDownloadButton(),
-          ]);
+        const [download] = await Promise.all([
+          page.waitForEvent('download'),
+          downloadManagerPopup.clickDownloadButton(),
 
-          const filePath = "../downloads/"
-          console.log(`File downloaded to: ${filePath}`);
+        ]);
+        // downloadManagerPopup.validateAndDownloadReport(expectedFileContent)
+        downloadHelper.validateFileContent(downloadDir,"web_application_firewall_csv_report",expectedFileContent);
 
-          downloadHelper.validateFileContent(filePath!, expectedFileContent);
-    
       });
 
       console.log('Test completed successfully.');

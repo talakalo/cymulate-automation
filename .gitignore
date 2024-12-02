@@ -1,4 +1,6 @@
 node_modules/
 test-results/
 package-lock.json
-src/downloads/web_application_firewall_csv_report_2024_08_06_16_18.csv
+src/downloads/web_application_firewall_csv_*
+playwright-report/
+playwright-report/data/

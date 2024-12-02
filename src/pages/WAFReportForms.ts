@@ -49,19 +49,16 @@ export class WAFReportForms {
     await this.page.getByRole('button', { name: 'Generate Report' }).click();
 
     this.clickCsvDownloadButton();
-    console.log('Download CSV initiated.');
+    
   }
 
+  async validateReportDownloadToast() {
+    console.log('Validating report download toast...');
+    const toast = this.page.getByText('SuccessReport Added To Manager');;
+    expect(toast).toBeVisible();    
+}
   async clickCsvDownloadButton() {
-    // Define the locator for your target element
-    const elementLocator = this.page.getByRole('button', { name: 'CSV' }).first();
-
-    // Retrieve the bounding box of the element
-    const box = await elementLocator.boundingBox();
-
-    // Click at the bottom-right corner
-    if (box) {
-      await this.page.mouse.click(box.x + box.width, box.y + box.height);
-    }
+    console.log('Clicking on the CSV button...');
+     this.page.getByRole('button', { name: 'CSV' }).first().click();
   }
 }

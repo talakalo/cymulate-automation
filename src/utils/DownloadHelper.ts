@@ -22,17 +22,66 @@ export class DownloadHelper {
     }
   }
 
-  validateFileContent(filePath: string, expectedContent: string) {
-    try {
-      console.log(`Validating file content for file: ${filePath}...`);
-      const content = fs.readFileSync(filePath, 'utf-8');
-      if (!content.includes(expectedContent)) {
-        throw console.error(`Expected content not found in file: ${filePath}`);
+  async validateFileContent(directory: string, fileName: string, expectedContent: string): void {
+    
+    let retries = 5;
+    while (retries > 0) {
+      const files = fs.readdirSync(directory);
+      
+      console.log(`Waiting for file: ${fileName}...`);
+      console.log(`directory: ${directory}`);
+      if (directory && files.some(file => file.includes(fileName))) {
+        break;
       }
-      console.log('File content validation successful.');
-    } catch (error) {
-      console.error('Error validating file content:', error);
-      throw error;
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      retries--;
     }
+    if (retries === 0) {
+      throw new Error('File not found after retries.');
+    }
+
+    const content = fs.readFileSync(directory, 'utf-8');
+    if (!content.includes(expectedContent)) {
+      throw new Error(`Expected content not found in file: ${directory}`);
+    }
+    console.log('File content validated successfully.');
   }
+
+  /*  async validateFileContent(expectedContent: string) {
+      try {
+    console.log(`Validating files in directory: ${this.downloadDir}`);
+  
+    // List all files in the directory
+    const files = fs.readdirSync(this.downloadDir);
+    console.log('Files in directory:', files);
+  
+    // Find the first CSV file
+    const csvFile = files.find(file => file.startsWith('web_application_firewall'));
+    if (!csvFile) {
+      throw new Error('No CSV file found in downloads directory.');
+    }
+  
+    // Construct the full path to the file
+    const filePath = path.join(this.downloadDir, csvFile);
+    console.log(`Reading file: ${filePath}`);
+  
+    // Read file content
+    const content = fs.readFileSync(filePath, 'utf-8');
+    console.log('File content read successfully.');
+  
+    // Check if the file content includes the expected content
+    if (!content.includes(expectedContent)) {
+      throw new Error(`Expected content not found in file: ${filePath}`);
+    }
+  
+    console.log('File content validated successfully.');
+  } catch (error) {
+    console.error('Error validating file content:', error);
+    // Read the content of the file
+    throw error;
+  }
+   // }
+   
+  // Validate if the content includes the expected content
+  */
 }
