@@ -4,3 +4,7 @@ package-lock.json
 src/downloads/web_application_firewall_csv_*
 playwright-report/
 playwright-report/data/
+.env
+
+src/testData/data.ts
+*/testData/data.*

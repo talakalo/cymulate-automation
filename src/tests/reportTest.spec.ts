@@ -5,47 +5,53 @@ import { DashboardsPage } from '../pages/DashboardsPage';
 import { DownloadHelper } from '../utils/DownloadHelper';
 import { loginTestData } from '../testData/data';
 import * as path from 'path';
-import * as fs from 'fs';
 import { WAFAssessmentsPage } from '../pages/WAFAssessmentsPage';
 import { WAFReportForms } from '../pages/WAFReportForms';
 import { DownloadManager } from '../pages/DownloadManager';
+import { Logger } from '../utils/logger';
+import { BrowserManager } from '../utils/browserManager';
 
-test.describe('Cymulate QA Automation', () => {
-  let reportsPage: ReportsPage;
+test.describe('generate report and download CSV flow', () => {
   let dashboardsPage: DashboardsPage;
+  let reportsPage: ReportsPage;
   let wafPage: WAFAssessmentsPage;
   let wafReportForms: WAFReportForms;
   let downloadManagerPopup: DownloadManager;
-
-  const credentials = {
-    email: loginTestData.user.username,
-    password: loginTestData.user.password,
-  };
+  let browserManager: BrowserManager;
+  let downloadHelper: DownloadHelper;
 
   const downloadDir = path.resolve(__dirname, '../downloads');
+  const credentials = {
+    email: loginTestData.user.username!,
+    password: loginTestData.user.password!,
+  };
   const expectedWAFUrl = 'https://ekslabs.cymulatedev.com';
   const expectedStatus = 'Completed';
   const expectedScore = '29';
-  const expectedFileContent = 'https://ekslabs.cymulatedev.com\\Program Files\\Apache Group\\Apache\\logs\\error.log';
-  let downloadHelper: DownloadHelper;
-  test.beforeEach(async ({ page }) => {
-    console.log('Setting up environment...');
+  const expectedFileContent =
+    'https://ekslabs.cymulatedev.com\\Program Files\\Apache Group\\Apache\\logs\\error.log';
+
+  test.beforeAll(async () => {
+    browserManager = new BrowserManager();
+    await browserManager.initialize();
     downloadHelper = new DownloadHelper(downloadDir);
-    downloadHelper.clearDownloadDir();
-    await page.context().newCDPSession(page).then(client =>
-      client.send('Page.setDownloadBehavior', {
-        behavior: 'allow',
-        downloadPath: downloadDir, // Set the desired download directory
-      })
-    );
-    console.log('Environment setup completed.');
   });
 
-  test('Validate report details and download CSV', async ({ page }) => {
+  test.afterAll(async () => {
+    await browserManager.tearDown();
+  });
+
+  test.beforeEach(async () => {
+    downloadHelper.clearDownloadDir();
+    Logger.info('Setup environment completed.');
+  });
+
+  test('Validate report details and download CSV', async () => {
+    const page = browserManager.getPage();
     const loginPage = new LoginPage(page);
-    downloadHelper= new DownloadHelper(downloadDir);
+
     try {
-      console.log('Starting test: Validate report details and download CSV...');
+      Logger.info('Starting test: Validate report details and download CSV...');
 
       await test.step('Log in with valid credentials', async () => {
         dashboardsPage = await loginPage.navigate().then(() =>
@@ -68,31 +74,23 @@ test.describe('Cymulate QA Automation', () => {
         await wafReportForms.validateOverallScore(expectedScore);
       });
 
-      await test.step('Generate and CSV report', async () => {
-        await wafReportForms.downloadCSV();
-        wafReportForms.validateReportDownloadToast()
-      });
+      await test.step('Generate and Download CSV report', async () => {
+        await wafReportForms.generateReport();
 
-      await test.step('Download and validate the CSV report', async () => {
-        
         downloadManagerPopup = new DownloadManager(page);
-
         await downloadManagerPopup.openDownloadManagerPopup();
 
         const [download] = await Promise.all([
           page.waitForEvent('download'),
           downloadManagerPopup.clickDownloadButton(),
-
         ]);
-        // downloadManagerPopup.validateAndDownloadReport(expectedFileContent)
-        downloadHelper.validateFileContent(downloadDir,"web_application_firewall_csv_report",expectedFileContent);
 
+        downloadHelper.validateFileContent(downloadDir, 'web_application_firewall_csv_report', expectedFileContent);
       });
 
-      console.log('Test completed successfully.');
-
+      Logger.info('Test completed successfully.');
     } catch (error) {
-      console.error('Test failed:', error);
+      Logger.error('Test failed:', error);
       throw error;
     }
   });

@@ -1,23 +1,21 @@
 import { Page } from "playwright/test";
 import { WAFReportForms } from "./WAFReportForms";
-
+import { Logger } from '../utils/logger';
 export class WAFAssessmentsPage {
-    private page: Page;
+  private page: Page;
+  readonly firstRow = 'div.table-row.attack-item-container';
 
-  
-    private firstRow = 'div.table-row.attack-item-container';
-  
-  
-    constructor( page: Page) {
-      this.page = page;
-    }  
+
+  constructor(page: Page) {
+    this.page = page;
+  }
 
   async selectFirstCompletedRow() {
     try {
-      console.log('Selecting the first Completed row...');
+      Logger.info('Selecting the first Completed row...');
       const firstRow = this.page.locator(this.firstRow).first();
       await firstRow.click();
-      console.log('Selected the first Completed row successfully.');
+      Logger.info('Selected the first Completed row successfully.');
 
       return new WAFReportForms(this.page);
     } catch (error) {
@@ -25,6 +23,6 @@ export class WAFAssessmentsPage {
       throw error;
     }
   }
-        
+
 
 }

@@ -1,7 +1,7 @@
 import { expect, Page } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
-
+import { Logger } from '../utils/logger';
 export class DownloadManager {
     private page: Page;
 
@@ -16,19 +16,19 @@ export class DownloadManager {
         this.page = page;
     }
 
-   async clickDownloadButton() {
-        console.log('Clicking the download button...');
-        const downloadButton = this.page.locator(this.downloadButton).first()
+    async clickDownloadButton() {
+        Logger.info('Clicking the download button...');
+        const downloadButton = this.page.locator(this.downloadButton).first();
 
         await downloadButton.click();
 
     }
     async openDownloadManagerPopup() {
         try {
-            console.log('Opening Download Manager popup...');
+            Logger.info('Opening Download Manager popup...');
             await this.page.getByTestId('open-download-manager-button').click();
             await this.page.waitForSelector(this.downloadManagerPopup, { state: 'visible', timeout: 30000 });
-            console.log('Download Manager popup is visible.');
+            Logger.info('Download Manager popup is visible.');
         } catch (error) {
             console.error('Failed to open Download Manager popup:', error);
             throw error;
@@ -37,15 +37,15 @@ export class DownloadManager {
 
     async validateAndDownloadReport(expectedText: string) {
         try {
-            console.log('Validating report text in Download Manager popup...');
+            Logger.info('Validating report text in Download Manager popup...');
             const reportText = await this.page.textContent(this.reportText);
 
             if (reportText !== null && !reportText.includes(expectedText)) {
                 throw new Error(`Expected text "${expectedText}" not found in the report.`);
             }
-            console.log('Report text validated successfully.');
+            Logger.info('Report text validated successfully.');
 
-            console.log('Clicking the download button...');
+            Logger.info('Clicking the download button...');
             const downloadButton = this.page.locator(this.downloadButton).first()
 
             await downloadButton.click();
@@ -56,16 +56,16 @@ export class DownloadManager {
 
             const downloadDir = path.join(__dirname, '..', 'downloads');
             const filePath = path.join(downloadDir, download.suggestedFilename());
-        
 
-            console.log(`File downloaded at: ${filePath}`);
+
+            Logger.info(`File downloaded at: ${filePath}`);
             const fileContent = fs.readFileSync(filePath, 'utf-8');
 
             if (!fileContent.includes('https://ekslabs.cymulatedev.com\\Program Files\\Apache Group\\Apache\\logs\\error.log')) {
                 throw new Error('Expected content not found in the downloaded file.');
             }
 
-            console.log('File content validated successfully.');
+            Logger.info('File content validated successfully.');
         } catch (error) {
             console.error('Error during report validation or download:', error);
             throw error;

@@ -4,9 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "npx playwright test",
-    "test-ui": "npx playwright test --ui" ,
+    "test-ui": "npx playwright test --ui",
     "test-debug": "npx playwright test --debug"
-
   },
   "keywords": [],
   "author": "Tal Akalo",
@@ -14,6 +13,7 @@
   "description": "cymulate home task qa-automation",
   "devDependencies": {
     "@playwright/test": "^1.49.0",
+    "dotenv": "^16.4.7",
     "playwright": "^1.49.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
