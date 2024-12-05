@@ -77,7 +77,7 @@ export class WAFReportForms {
   async validateReportDownloadToast() {
     Logger.info('Validating report download toast...');
     const toast = this.page.getByText('SuccessReport Added To Manager');;
-    //expect.soft(toast).toBeVisible({ timeout: 90000 });
+    expect.soft(toast).toBeVisible({ timeout: 90000 });
   }
   async clickCsvDownloadButton() {
     Logger.info('Clicking on the CSV button...');

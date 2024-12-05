@@ -22,8 +22,8 @@ test.describe('generate report and download CSV flow', () => {
 
   const downloadDir = path.resolve(__dirname, '../downloads');
   const credentials = {
-    email: loginTestData.user.username!,
-    password: loginTestData.user.password!,
+    email: process.env.USERNAME!,
+    password: process.env.PASSWORD!,
   };
   const expectedWAFUrl = 'https://ekslabs.cymulatedev.com';
   const expectedStatus = 'Completed';
